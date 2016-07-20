@@ -19,7 +19,7 @@ output ='''
 memory_initialization_radix = 16 ;
 memory_initialization_vector =
 '''
-RAM_MAX = 512
+RAM_MAX = 2048
 COMMENT = ";"
 
 C	=	0 	# C
@@ -60,7 +60,8 @@ def main():
 		# for comment
 		if line[0] == COMMENT:
 			continue
-
+		if line == "\n":
+			continue
 		elem = line.rstrip().split(" ")
 
 		# elem[2] == 0 : command mode

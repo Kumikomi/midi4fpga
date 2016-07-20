@@ -16,18 +16,23 @@ def main():
 		quit()
 
 	filename = os.path.basename(argvs[1]).split(".")
+	if os.path.isdir("%s"%(filename[0])) == False:
+		os.makedirs("%s"%(filename[0]))
+	filepath = "%s/"%filename[0]
 
-	fo = open("seq_%s.txt"%filename[0],"w")
 	midi_data = pretty_midi.PrettyMIDI(argvs[1])
-
+	track_number = 0
 	for instrument in midi_data.instruments:
 		prev_end = 0
 		total_length = 0
 
 		if len(instrument.notes) == 0:
 			continue
-		fo.write(COMMENT+pretty_midi.constants.INSTRUMENT_MAP[instrument.program]+"\n")
 
+		fo = open(filepath+"%d_"%track_number
+			+pretty_midi.constants.INSTRUMENT_MAP[instrument.program]+".txt","w")
+
+		fo.write(COMMENT+pretty_midi.constants.INSTRUMENT_MAP[instrument.program]+"\n")
 		for note in instrument.notes:
 			start = midi_data.time_to_tick(note.start)
 			end = midi_data.time_to_tick(note.end)
@@ -73,6 +78,10 @@ def main():
 			rest_length = start - prev_end
 
 			if rest_length > 0:
+				while rest_length > 4000:
+					fo.write("R 0 %s\n"%4000)
+					rest_length -= 4000
+					total_length += 4000
 				fo.write("R 0 %s\n"%rest_length)
 				total_length += rest_length
 
@@ -82,6 +91,7 @@ def main():
 			total_length += length
 		fo.write("CMD 0 0\n")
 		fo.write("%sTotal length %s\n\n"%(COMMENT,total_length))
+		track_number += 1
 
 if __name__ == '__main__':
 	main()
